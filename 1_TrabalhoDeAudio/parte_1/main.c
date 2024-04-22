@@ -1,9 +1,12 @@
 #include <stdlib.h>
 #include <stdio.h>
+#include <math.h>
 
+// Files Size
 #define BYTES 10
 #define BYTES_EXPOENT 20
 
+// Files Name
 #define RANDOM_FILE_NAME "random.bin"
 #define RANDOM_CUT_FILE_NAME "random_cut.bin"
 #define PA_FILE_NAME "pa.bin"
@@ -11,8 +14,15 @@
 #define FIB_FILE_NAME "fib.bin"
 #define LUCAS_FILE_NAME "lucas.bin"
 
+// Define params to each sequence
+#define PA_INITIAL 0
+#define PA_ROOT 10
+#define PG_INITIAL 1
+#define PG_ROOT 5
+#define LUCAS_FIRST 2
+#define LUCAS_SECOND 1
 
-unsigned int power(int number, int expoent)
+unsigned int power(const int number, const int expoent)
 {
     int i = 0;
     unsigned int r = 1;
@@ -26,7 +36,7 @@ unsigned int power(int number, int expoent)
 }
 
 
-void error_log(int error_number, char *file_name)
+void error_log(const int error_number, const char *file_name)
 {
     switch (error_number)
     {
@@ -37,7 +47,7 @@ void error_log(int error_number, char *file_name)
 }
 
 
-int file_alredy_exists(char *file_name)
+int file_alredy_exists(const char *file_name)
 {
     FILE *fptr = fopen(file_name, "rb");
 
@@ -54,7 +64,7 @@ int file_alredy_exists(char *file_name)
 }
 
 
-void random_generator(char *file_name, int number_limit)
+void random_generator(const char *file_name, const int number_limit)
 {
     unsigned int sf = BYTES*power(2, BYTES_EXPOENT);  // sf is "stop flag"
     unsigned int i = 0;
@@ -75,7 +85,7 @@ void random_generator(char *file_name, int number_limit)
 }
 
 
-void pa_sequence_generator(char *file_name, int initial, int root)
+void pa_sequence_generator(const char *file_name, const int initial, const int root)
 {
     __int64 n = initial;
     unsigned char c;
@@ -90,10 +100,12 @@ void pa_sequence_generator(char *file_name, int initial, int root)
         c = abs(c)%256;
         fwrite(&c, sizeof(char), 1, fptr);
     }
+
+    fclose(fptr);
 }
 
 
-void pg_sequence_generator(char *file_name, int initial, int root)
+void pg_sequence_generator(const char *file_name, const int initial, const int root)
 {
     __int64 n = initial;
     unsigned char c;
@@ -108,20 +120,41 @@ void pg_sequence_generator(char *file_name, int initial, int root)
         c = abs(c)%256;
         fwrite(&c, sizeof(char), 1, fptr);
     }
-}
-
-
-void fib()
-{
     
+    fclose(fptr);
 }
 
 
-void lucas()
+void lucas_sequence_generator(const char *file_name, const int first, const int second)
 {
+    unsigned  __int64 n;
+    unsigned __int64 n1 = first;
+    unsigned __int64 n2 = second;
+    
+    unsigned char c;
+    unsigned int sf = BYTES*power(2, BYTES_EXPOENT);
+    int i = 0;
 
+    FILE *fptr = fopen(file_name, "ab");
+
+    for (i; i < sf; i++)
+    {
+        n = n1+n2;
+        n2 = n1;
+        n1 = n;
+
+        c = n%256;
+        fwrite(&c, sizeof(char), 1, fptr);
+    }
+    
+    fclose(fptr);
 }
 
+
+void fib_sequence_generator(const char *file_name)
+{
+    lucas_sequence_generator(file_name, 0, 1);
+}
 
 
 int main()
@@ -130,14 +163,16 @@ int main()
     error_log(file_alredy_exists(RANDOM_FILE_NAME), RANDOM_FILE_NAME);
     error_log(file_alredy_exists(RANDOM_CUT_FILE_NAME), RANDOM_CUT_FILE_NAME);
     error_log(file_alredy_exists(PA_FILE_NAME), PA_FILE_NAME);
-
-    // Define params to each_sequence
-    int pa_initial = 0;
-    int pa_root = 10;
+    error_log(file_alredy_exists(PG_FILE_NAME), PG_FILE_NAME);
+    error_log(file_alredy_exists(LUCAS_FILE_NAME), LUCAS_FILE_NAME);
+    error_log(file_alredy_exists(FIB_FILE_NAME), FIB_FILE_NAME);
 
     random_generator(RANDOM_FILE_NAME, 256);
     random_generator(RANDOM_CUT_FILE_NAME, 27);
-    pa_sequence_generator(PA_FILE_NAME, pa_initial, pa_root);
+    pa_sequence_generator(PA_FILE_NAME, PA_INITIAL, PA_ROOT);
+    pg_sequence_generator(PG_FILE_NAME, PG_INITIAL, PG_ROOT);
+    lucas_sequence_generator(LUCAS_FILE_NAME, LUCAS_FIRST, LUCAS_SECOND);
+    fib_sequence_generator(FIB_FILE_NAME);
 
     return 0;
 }
