@@ -13,6 +13,7 @@
 #define PG_FILE_NAME "pg.bin"
 #define FIB_FILE_NAME "fib.bin"
 #define LUCAS_FILE_NAME "lucas.bin"
+#define PRIMO_FILE_NAME "primo.bin"
 
 // Define params to each sequence
 #define PA_INITIAL 0
@@ -21,6 +22,7 @@
 #define PG_ROOT 5
 #define LUCAS_FIRST 2
 #define LUCAS_SECOND 1
+
 
 unsigned int power(const int number, const int expoent)
 {
@@ -36,17 +38,6 @@ unsigned int power(const int number, const int expoent)
 }
 
 
-void error_log(const int error_number, const char *file_name)
-{
-    switch (error_number)
-    {
-    case 1:
-        printf("Atention, the archive %s alredy exist; switch it's name to correctly work", file_name);
-        exit(1);
-    }
-}
-
-
 int file_alredy_exists(const char *file_name)
 {
     FILE *fptr = fopen(file_name, "rb");
@@ -54,6 +45,7 @@ int file_alredy_exists(const char *file_name)
     if (fptr != NULL)
     {
         fclose(fptr);
+        printf("Atention, the archive %s alredy exist; switch it's name to correctly work", file_name);
         return 1;
     }
 
@@ -61,6 +53,20 @@ int file_alredy_exists(const char *file_name)
     fptr = fopen(file_name, "wb");
     fclose(fptr);
     return 0;
+}
+
+
+int is_primo(const int n)
+{
+    if (n <= 1) {
+        return 0;
+    }
+    for (int i = 2; i * i <= n; i++) {
+        if (n % i == 0) {
+            return 0;
+        }
+    }
+    return 1;
 }
 
 
@@ -85,9 +91,9 @@ void random_generator(const char *file_name, const int number_limit)
 }
 
 
-void pa_sequence_generator(const char *file_name, const int initial, const int root)
+void pa_sequence_generator(const char *file_name, const int initial, const float root)
 {
-    __int64 n = initial;
+    unsigned double n = initial;
     unsigned char c;
     unsigned int sf = BYTES*power(2, BYTES_EXPOENT);
     int i = 0;
@@ -157,15 +163,40 @@ void fib_sequence_generator(const char *file_name)
 }
 
 
+void primo_sequence_generator(const char * file_name) {
+    unsigned int sf = BYTES*power(2, BYTES_EXPOENT);  // sf is "stop flag"
+    unsigned int i = 0;
+    unsigned char c;
+    unsigned int n = 1;
+
+    FILE *fptr = fopen(file_name, "ab");
+
+    for (i; i<sf; i++)
+    {
+        while (! is_primo(n))
+        {
+            n++;
+        }
+
+        c = n % 256;
+
+        fwrite(&c, sizeof(char), 1, fptr);
+    }
+
+    fclose(fptr);
+}
+
+
 int main()
 {
     // Verify if each file alredy exist
-    error_log(file_alredy_exists(RANDOM_FILE_NAME), RANDOM_FILE_NAME);
-    error_log(file_alredy_exists(RANDOM_CUT_FILE_NAME), RANDOM_CUT_FILE_NAME);
-    error_log(file_alredy_exists(PA_FILE_NAME), PA_FILE_NAME);
-    error_log(file_alredy_exists(PG_FILE_NAME), PG_FILE_NAME);
-    error_log(file_alredy_exists(LUCAS_FILE_NAME), LUCAS_FILE_NAME);
-    error_log(file_alredy_exists(FIB_FILE_NAME), FIB_FILE_NAME);
+    file_alredy_exists(RANDOM_FILE_NAME);
+    file_alredy_exists(RANDOM_CUT_FILE_NAME);
+    file_alredy_exists(PA_FILE_NAME);
+    file_alredy_exists(PG_FILE_NAME);
+    file_alredy_exists(LUCAS_FILE_NAME);
+    file_alredy_exists(FIB_FILE_NAME);
+    file_alredy_exists(PRIMO_FILE_NAME);
 
     random_generator(RANDOM_FILE_NAME, 256);
     random_generator(RANDOM_CUT_FILE_NAME, 27);
@@ -173,6 +204,7 @@ int main()
     pg_sequence_generator(PG_FILE_NAME, PG_INITIAL, PG_ROOT);
     lucas_sequence_generator(LUCAS_FILE_NAME, LUCAS_FIRST, LUCAS_SECOND);
     fib_sequence_generator(FIB_FILE_NAME);
+    primo_sequence_generator(PRIMO_FILE_NAME)
 
     return 0;
 }
