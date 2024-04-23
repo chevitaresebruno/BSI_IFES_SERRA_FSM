@@ -93,7 +93,7 @@ void random_generator(const char *file_name, const int number_limit)
 
 void pa_sequence_generator(const char *file_name, const int initial, const float root)
 {
-    unsigned double n = initial;
+    double n = initial;
     unsigned char c;
     unsigned int sf = BYTES*power(2, BYTES_EXPOENT);
     int i = 0;
@@ -204,7 +204,7 @@ int main()
     pg_sequence_generator(PG_FILE_NAME, PG_INITIAL, PG_ROOT);
     lucas_sequence_generator(LUCAS_FILE_NAME, LUCAS_FIRST, LUCAS_SECOND);
     fib_sequence_generator(FIB_FILE_NAME);
-    primo_sequence_generator(PRIMO_FILE_NAME)
+    primo_sequence_generator(PRIMO_FILE_NAME);
 
     return 0;
 }
